@@ -32,9 +32,7 @@ box-shadow:0 0 25px rgba(0,136,255,.25);
 
 .banner{
 height:170px;
-background:
-url('https://raw.githubusercontent.com/rajrachit086-code/Web/refs/heads/main/20260531_155902.jpg')
-center/cover;
+background:url('https://raw.githubusercontent.com/rajrachit086-code/Web/refs/heads/main/20260531_155902.jpg') center/cover;
 position:relative;
 }
 
@@ -66,6 +64,7 @@ font-size:34px;
 margin:-55px auto 15px;
 position:relative;
 z-index:2;
+box-shadow:0 0 15px rgba(0,136,255,.45);
 }
 
 .title{
@@ -114,6 +113,7 @@ font-weight:700;
 cursor:pointer;
 background:#0088ff;
 color:white;
+box-shadow:0 0 15px rgba(0,136,255,.45);
 }
 
 .status{
@@ -176,7 +176,6 @@ set
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-/* Firebase Config Direct */
 const firebaseConfig = {
 apiKey: "AIzaSyCAoMB2gvsQe1Oq6LGluR2IfjjszyOPWi8",
 databaseURL: "https://rajrachitkey-default-rtdb.firebaseio.com",
@@ -188,11 +187,12 @@ const db = getDatabase(app);
 
 /* Generate HWID */
 function generateHWID(){
-return "" +
+return 
 Math.random().toString(36).substring(2,8) +
 Date.now().toString().substring(5);
 }
 
+/* Load or Create HWID */
 let hwid = localStorage.getItem("hwid");
 
 if(!hwid){
@@ -202,36 +202,57 @@ localStorage.setItem("hwid", hwid);
 
 document.getElementById("hwid").innerText = hwid;
 
-/* Login */
+/* Login Function */
 window.login = async function(){
 
-let key =
-document.getElementById("key").value.trim();
+let key = document.getElementById("key").value.trim();
 
 if(key==""){
-document.getElementById("status")
-.innerText="Enter Key First";
+document.getElementById("status").innerText="Enter Key First";
 return;
 }
 
-document.getElementById("status")
-.innerText="Checking...";
+document.getElementById("status").innerText="Checking...";
 
-let snap =
-await get(ref(db,"licenses/"+key));
+/* OFFLINE MODE */
+if(!navigator.onLine){
+
+let savedKey = localStorage.getItem("savedKey");
+let savedHWID = localStorage.getItem("savedHWID");
+
+if(savedKey===key && savedHWID===hwid){
+
+document.getElementById("status").innerText="Offline Login Success";
+
+setTimeout(()=>{
+if(window.Android){
+Android.close();
+}
+},1000);
+
+}else{
+document.getElementById("status").innerText="No Internet / Invalid Offline Key";
+}
+
+return;
+}
+
+/* ONLINE MODE */
+try{
+
+let snap = await get(ref(db,"licenses/"+key));
 
 if(!snap.exists()){
-document.getElementById("status")
-.innerText="Invalid Key";
+document.getElementById("status").innerText="Invalid Key";
 return;
 }
 
 let data = snap.val();
 
-/* Banned Check */
-if(data.status=="banned"){
-document.getElementById("status")
-.innerText="Key Banned";
+/* Ban Check */
+if(data.status==="banned"){
+
+document.getElementById("status").innerText="Key Banned";
 
 setTimeout(()=>{
 if(window.Android){
@@ -249,27 +270,36 @@ await set(
 ref(db,"licenses/"+key+"/devices/"+deviceId),
 {
 hwid:hwid
-});
+}
+);
 
-/* Bind Main HWID */
+/* Save Main HWID */
 await set(
 ref(db,"licenses/"+key+"/hwid"),
 hwid
 );
 
-document.getElementById("status")
-.innerText="Login Success";
+/* Save Offline */
+localStorage.setItem("savedKey", key);
+localStorage.setItem("savedHWID", hwid);
 
-/* Close Dialog */
+document.getElementById("status").innerText="Login Success";
+
 setTimeout(()=>{
 if(window.Android){
 Android.close();
 }
-},1200);
+},1000);
+
+}catch(e){
+
+document.getElementById("status").innerText="Connection Error";
+
+}
 
 };
 
 </script>
 
 </body>
-</html>
+  </html>
