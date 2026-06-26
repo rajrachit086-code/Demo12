@@ -2,8 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Secure Login</title>
 
@@ -25,11 +24,14 @@ overflow:hidden;
 position:relative;
 }
 
-/* Background Animation */
+/* Animated Background */
 body::before{
 content:"";
 position:fixed;
-inset:0;
+top:0;
+left:0;
+width:100%;
+height:100%;
 background:linear-gradient(
 -45deg,
 #ff0000,
@@ -51,7 +53,10 @@ z-index:-2;
 body::after{
 content:"";
 position:fixed;
-inset:0;
+top:0;
+left:0;
+width:100%;
+height:100%;
 background:rgba(0,0,0,.75);
 backdrop-filter:blur(12px);
 z-index:-1;
@@ -62,16 +67,13 @@ width:340px;
 background:rgba(18,18,25,.96);
 border-radius:24px;
 overflow:hidden;
-box-shadow:
-0 0 25px rgba(0,136,255,.25);
+box-shadow:0 0 25px rgba(0,136,255,.25);
 border:1px solid rgba(255,255,255,.05);
 }
 
 .banner{
 height:170px;
-background:
-url('https://raw.githubusercontent.com/rajrachit086-code/Web/refs/heads/main/20260531_155902.jpg')
-center/cover;
+background:url('https://raw.githubusercontent.com/rajrachit086-code/Web/main/20260531_155902.jpg') center/cover;
 position:relative;
 }
 
@@ -103,8 +105,7 @@ font-size:34px;
 margin:-55px auto 15px;
 position:relative;
 z-index:2;
-box-shadow:
-0 0 20px rgba(0,136,255,.5);
+box-shadow:0 0 20px rgba(0,136,255,.5);
 }
 
 .title{
@@ -153,9 +154,8 @@ font-weight:700;
 cursor:pointer;
 background:#0088ff;
 color:white;
-box-shadow:
-0 0 15px rgba(0,136,255,.45);
 margin-bottom:10px;
+box-shadow:0 0 15px rgba(0,136,255,.45);
 }
 
 .close{
@@ -170,6 +170,7 @@ font-weight:600;
 }
 </style>
 </head>
+
 <body>
 
 <div class="popup">
@@ -180,9 +181,7 @@ font-weight:600;
 
 <div class="logo">🔐</div>
 
-<div class="title">
-Secure Login
-</div>
+<div class="title">Secure Login</div>
 
 <div class="subtitle">
 Enter your access key to continue
@@ -197,18 +196,15 @@ HWID:
 <span id="hwid"></span>
 </div>
 
-<button class="btn"
-onclick="login()">
+<button class="btn" onclick="login()">
 Authenticate
 </button>
 
-<button class="btn close"
-onclick="Android.close()">
+<button class="btn close" onclick="Android.close()">
 Close
 </button>
 
-<div class="status"
-id="status">
+<div class="status" id="status">
 Waiting...
 </div>
 
@@ -228,7 +224,6 @@ set
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-/* Firebase Config */
 const firebaseConfig = {
 apiKey: "AIzaSyCAoMB2gvsQe1Oq6LGluR2IfjjszyOPWi8",
 databaseURL: "https://rajrachitkey-default-rtdb.firebaseio.com",
@@ -238,7 +233,7 @@ projectId: "rajrachitkey"
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-/* Native HWID */
+/* Get HWID from Android */
 let hwid = "UNKNOWN";
 
 try{
@@ -249,37 +244,35 @@ hwid = "NO-HWID";
 
 document.getElementById("hwid").textContent = hwid;
 
-/* Login */
+/* Login Function */
 window.login = async function(){
 
 let key =
 document.getElementById("key").value.trim();
 
 if(key==""){
-document.getElementById("status")
-.textContent="Enter Key First";
+document.getElementById("status").textContent =
+"Enter Key First";
 return;
 }
 
-document.getElementById("status")
-.textContent="Checking...";
+document.getElementById("status").textContent =
+"Checking...";
 
 let snap =
 await get(ref(db,"licenses/"+key));
 
 if(!snap.exists()){
-document.getElementById("status")
-.textContent="Invalid Key";
+document.getElementById("status").textContent =
+"Invalid Key";
 return;
 }
 
 let data = snap.val();
 
-/* Ban Check */
 if(data.status=="banned"){
-
-document.getElementById("status")
-.textContent="Key Banned";
+document.getElementById("status").textContent =
+"Key Banned";
 
 setTimeout(()=>{
 Android.close();
@@ -288,7 +281,6 @@ Android.close();
 return;
 }
 
-/* Save Device */
 let deviceId =
 "device_"+Date.now();
 
@@ -298,352 +290,12 @@ ref(db,"licenses/"+key+"/devices/"+deviceId),
 hwid: hwid
 });
 
-document.getElementById("status")
-.textContent="Login Success";
+document.getElementById("status").textContent =
+"Login Success";
 
 setTimeout(()=>{
 Android.close();
 },1000);
-
-};
-
-</script>
-
-</body>
-</html>.title{
-font-size:24px;
-font-weight:800;
-margin-bottom:5px;
-}
-
-.subtitle{
-font-size:13px;
-color:#aaa;
-margin-bottom:18px;
-}
-
-.input{
-width:100%;
-height:52px;
-background:#111821;
-border:2px solid #0088ff;
-border-radius:14px;
-padding:15px;
-font-size:16px;
-color:white;
-outline:none;
-margin-bottom:15px;
-}
-
-.hwidBox{
-background:#111821;
-padding:14px;
-border-radius:14px;
-font-size:12px;
-word-break:break-all;
-color:#aaa;
-margin-bottom:18px;
-text-align:left;
-}
-
-.btn{
-width:100%;
-height:50px;
-border:none;
-border-radius:14px;
-font-size:16px;
-font-weight:700;
-cursor:pointer;
-background:#0088ff;
-color:white;
-box-shadow:
-0 0 15px rgba(0,136,255,.45);
-}
-
-.status{
-margin-top:15px;
-font-size:14px;
-font-weight:600;
-}
-</style>
-</head>
-<body>
-
-<div class="bg"></div>
-<div class="overlay"></div>
-
-<div class="popup">
-
-<div class="banner"></div>
-
-<div class="content">
-
-<div class="logo">🔐</div>
-
-<div class="title">
-Secure Login
-</div>
-
-<div class="subtitle">
-Enter your access key to continue
-</div>
-
-<input id="key"
-class="input"
-placeholder="Enter Access Key">
-
-<div class="hwidBox">
-HWID:
-<span id="hwid"></span>
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<title>Secure Login</title>
-
-<style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:system-ui;
-}
-
-body{
-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
-background:#000;
-}
-
-.popup{
-width:340px;
-background:#111;
-border-radius:24px;
-overflow:hidden;
-box-shadow:0 0 25px rgba(0,136,255,.25);
-}
-
-.banner{
-height:170px;
-background:
-url('https://raw.githubusercontent.com/rajrachit086-code/Web/refs/heads/main/20260531_155902.jpg')
-center/cover;
-position:relative;
-}
-
-.banner::after{
-content:"";
-position:absolute;
-inset:0;
-background:linear-gradient(
-transparent,
-rgba(18,18,25,.96)
-);
-}
-
-.content{
-padding:20px;
-color:white;
-text-align:center;
-}
-
-.logo{
-width:72px;
-height:72px;
-border-radius:50%;
-background:#0088ff;
-display:flex;
-justify-content:center;
-align-items:center;
-font-size:34px;
-margin:-55px auto 15px;
-position:relative;
-z-index:2;
-}
-
-.title{
-font-size:24px;
-font-weight:800;
-margin-bottom:5px;
-}
-
-.subtitle{
-font-size:13px;
-color:#aaa;
-margin-bottom:18px;
-}
-
-.input{
-width:100%;
-height:52px;
-background:#111821;
-border:2px solid #0088ff;
-border-radius:14px;
-padding:15px;
-font-size:16px;
-color:white;
-outline:none;
-margin-bottom:15px;
-}
-
-.hwidBox{
-background:#111821;
-padding:14px;
-border-radius:14px;
-font-size:12px;
-word-break:break-all;
-color:#aaa;
-margin-bottom:18px;
-text-align:left;
-}
-
-.btn{
-width:100%;
-height:50px;
-border:none;
-border-radius:14px;
-font-size:16px;
-font-weight:700;
-cursor:pointer;
-background:#0088ff;
-color:white;
-}
-
-.status{
-margin-top:15px;
-font-size:14px;
-font-weight:600;
-}
-</style>
-</head>
-<body>
-
-<div class="popup">
-
-<div class="banner"></div>
-
-<div class="content">
-
-<div class="logo">🔐</div>
-
-<div class="title">
-Secure Login
-</div>
-
-<div class="subtitle">
-Enter your access key to continue
-</div>
-
-<input id="key"
-class="input"
-placeholder="Enter Access Key">
-
-<div class="hwidBox">
-HWID:
-<span id="hwid"></span>
-</div>
-
-<button class="btn"
-onclick="login()">
-Authenticate
-</button>
-
-<div class="status"
-id="status">
-Waiting...
-</div>
-
-</div>
-</div>
-
-<script type="module">
-
-import { initializeApp }
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-
-import {
-getDatabase,
-ref,
-get,
-set
-}
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-const firebaseConfig = {
-apiKey: localStorage.getItem("AIzaSyCAoMB2gvsQe1Oq6LGluR2IfjjszyOPWi8"),
-databaseURL: localStorage.getItem("https://rajrachitkey-default-rtdb.firebaseio.com"),
-projectId: localStorage.getItem("rajrachitkey")
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
-function generateHWID(){
-return "HWID-" +
-Math.random().toString(36).substring(2,8) +
-Date.now().toString().substring(6);
-}
-
-let hwid = localStorage.getItem("hwid");
-
-if(!hwid){
-hwid = generateHWID();
-localStorage.setItem("hwid", hwid);
-}
-
-document.getElementById("hwid").innerText = hwid;
-
-window.login = async function(){
-
-let key =
-document.getElementById("key").value.trim();
-
-if(key==""){
-document.getElementById("status")
-.innerText="Enter Key First";
-return;
-}
-
-document.getElementById("status")
-.innerText="Checking...";
-
-let snap =
-await get(ref(db,"licenses/"+key));
-
-if(!snap.exists()){
-document.getElementById("status")
-.innerText="Invalid Key";
-return;
-}
-
-let data = snap.val();
-
-if(data.status=="banned"){
-document.getElementById("status")
-.innerText="Key Banned";
-
-setTimeout(()=>{
-window.location.href="action://close";
-},1500);
-
-return;
-}
-
-let deviceId =
-"device_"+Date.now();
-
-await set(
-ref(db,"licenses/"+key+"/devices/"+deviceId),
-{
-hwid:hwid
-});
-
-document.getElementById("status")
-.innerText="Login Success";
 };
 
 </script>
