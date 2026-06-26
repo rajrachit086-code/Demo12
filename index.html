@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <title>Secure Login</title>
 
@@ -20,60 +20,21 @@ display:flex;
 justify-content:center;
 align-items:center;
 background:#000;
-overflow:hidden;
-position:relative;
-}
-
-/* Animated Background */
-body::before{
-content:"";
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:linear-gradient(
--45deg,
-#ff0000,
-#0088ff,
-#00ff88,
-#ff00ff
-);
-background-size:400% 400%;
-animation:bgmove 10s infinite;
-z-index:-2;
-}
-
-@keyframes bgmove{
-0%{background-position:0% 50%;}
-50%{background-position:100% 50%;}
-100%{background-position:0% 50%;}
-}
-
-body::after{
-content:"";
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,.75);
-backdrop-filter:blur(12px);
-z-index:-1;
 }
 
 .popup{
 width:340px;
-background:rgba(18,18,25,.96);
+background:#111;
 border-radius:24px;
 overflow:hidden;
 box-shadow:0 0 25px rgba(0,136,255,.25);
-border:1px solid rgba(255,255,255,.05);
 }
 
 .banner{
 height:170px;
-background:url('https://raw.githubusercontent.com/rajrachit086-code/Web/main/20260531_155902.jpg') center/cover;
+background:
+url('https://raw.githubusercontent.com/rajrachit086-code/Web/refs/heads/main/20260531_155902.jpg')
+center/cover;
 position:relative;
 }
 
@@ -105,7 +66,6 @@ font-size:34px;
 margin:-55px auto 15px;
 position:relative;
 z-index:2;
-box-shadow:0 0 20px rgba(0,136,255,.5);
 }
 
 .title{
@@ -154,13 +114,6 @@ font-weight:700;
 cursor:pointer;
 background:#0088ff;
 color:white;
-margin-bottom:10px;
-box-shadow:0 0 15px rgba(0,136,255,.45);
-}
-
-.close{
-background:#222;
-color:#ddd;
 }
 
 .status{
@@ -170,7 +123,6 @@ font-weight:600;
 }
 </style>
 </head>
-
 <body>
 
 <div class="popup">
@@ -181,7 +133,9 @@ font-weight:600;
 
 <div class="logo">🔐</div>
 
-<div class="title">Secure Login</div>
+<div class="title">
+Secure Login
+</div>
 
 <div class="subtitle">
 Enter your access key to continue
@@ -196,15 +150,13 @@ HWID:
 <span id="hwid"></span>
 </div>
 
-<button class="btn" onclick="login()">
+<button class="btn"
+onclick="login()">
 Authenticate
 </button>
 
-<button class="btn close" onclick="Android.close()">
-Close
-</button>
-
-<div class="status" id="status">
+<div class="status"
+id="status">
 Waiting...
 </div>
 
@@ -224,6 +176,7 @@ set
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
+/* Firebase Config Direct */
 const firebaseConfig = {
 apiKey: "AIzaSyCAoMB2gvsQe1Oq6LGluR2IfjjszyOPWi8",
 databaseURL: "https://rajrachitkey-default-rtdb.firebaseio.com",
@@ -233,69 +186,87 @@ projectId: "rajrachitkey"
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-/* Get HWID from Android */
-let hwid = "UNKNOWN";
-
-try{
-hwid = Android.getHWID();
-}catch(e){
-hwid = "NO-HWID";
+/* Generate HWID */
+function generateHWID(){
+return "HWID-" +
+Math.random().toString(36).substring(2,8) +
+Date.now().toString().substring(5);
 }
 
-document.getElementById("hwid").textContent = hwid;
+let hwid = localStorage.getItem("hwid");
 
-/* Login Function */
+if(!hwid){
+hwid = generateHWID();
+localStorage.setItem("hwid", hwid);
+}
+
+document.getElementById("hwid").innerText = hwid;
+
+/* Login */
 window.login = async function(){
 
 let key =
 document.getElementById("key").value.trim();
 
 if(key==""){
-document.getElementById("status").textContent =
-"Enter Key First";
+document.getElementById("status")
+.innerText="Enter Key First";
 return;
 }
 
-document.getElementById("status").textContent =
-"Checking...";
+document.getElementById("status")
+.innerText="Checking...";
 
 let snap =
 await get(ref(db,"licenses/"+key));
 
 if(!snap.exists()){
-document.getElementById("status").textContent =
-"Invalid Key";
+document.getElementById("status")
+.innerText="Invalid Key";
 return;
 }
 
 let data = snap.val();
 
+/* Banned Check */
 if(data.status=="banned"){
-document.getElementById("status").textContent =
-"Key Banned";
+document.getElementById("status")
+.innerText="Key Banned";
 
 setTimeout(()=>{
+if(window.Android){
 Android.close();
+}
 },1500);
 
 return;
 }
 
-let deviceId =
-"device_"+Date.now();
+/* Save Device */
+let deviceId = "device_"+Date.now();
 
 await set(
 ref(db,"licenses/"+key+"/devices/"+deviceId),
 {
-hwid: hwid
+hwid:hwid
 });
 
-document.getElementById("status").textContent =
-"Login Success";
+/* Bind Main HWID */
+await set(
+ref(db,"licenses/"+key+"/hwid"),
+hwid
+);
 
+document.getElementById("status")
+.innerText="Login Success";
+
+/* Close Dialog */
 setTimeout(()=>{
+if(window.Android){
 Android.close();
-},1000);
+}
+},1200);
+
 };
 
 </script>
