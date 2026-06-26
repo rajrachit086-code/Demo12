@@ -194,6 +194,156 @@ placeholder="Enter Access Key">
 <div class="hwidBox">
 HWID:
 <span id="hwid"></span>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Secure Login</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:system-ui;
+}
+
+body{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background:#000;
+}
+
+.popup{
+width:340px;
+background:#111;
+border-radius:24px;
+overflow:hidden;
+box-shadow:0 0 25px rgba(0,136,255,.25);
+}
+
+.banner{
+height:170px;
+background:
+url('https://raw.githubusercontent.com/rajrachit086-code/Web/refs/heads/main/20260531_155902.jpg')
+center/cover;
+position:relative;
+}
+
+.banner::after{
+content:"";
+position:absolute;
+inset:0;
+background:linear-gradient(
+transparent,
+rgba(18,18,25,.96)
+);
+}
+
+.content{
+padding:20px;
+color:white;
+text-align:center;
+}
+
+.logo{
+width:72px;
+height:72px;
+border-radius:50%;
+background:#0088ff;
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:34px;
+margin:-55px auto 15px;
+position:relative;
+z-index:2;
+}
+
+.title{
+font-size:24px;
+font-weight:800;
+margin-bottom:5px;
+}
+
+.subtitle{
+font-size:13px;
+color:#aaa;
+margin-bottom:18px;
+}
+
+.input{
+width:100%;
+height:52px;
+background:#111821;
+border:2px solid #0088ff;
+border-radius:14px;
+padding:15px;
+font-size:16px;
+color:white;
+outline:none;
+margin-bottom:15px;
+}
+
+.hwidBox{
+background:#111821;
+padding:14px;
+border-radius:14px;
+font-size:12px;
+word-break:break-all;
+color:#aaa;
+margin-bottom:18px;
+text-align:left;
+}
+
+.btn{
+width:100%;
+height:50px;
+border:none;
+border-radius:14px;
+font-size:16px;
+font-weight:700;
+cursor:pointer;
+background:#0088ff;
+color:white;
+}
+
+.status{
+margin-top:15px;
+font-size:14px;
+font-weight:600;
+}
+</style>
+</head>
+<body>
+
+<div class="popup">
+
+<div class="banner"></div>
+
+<div class="content">
+
+<div class="logo">🔐</div>
+
+<div class="title">
+Secure Login
+</div>
+
+<div class="subtitle">
+Enter your access key to continue
+</div>
+
+<input id="key"
+class="input"
+placeholder="Enter Access Key">
+
+<div class="hwidBox">
+HWID:
+<span id="hwid"></span>
 </div>
 
 <button class="btn"
@@ -222,63 +372,58 @@ set
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-/* Firebase Config */
 const firebaseConfig = {
-apiKey: localStorage.getItem("apiKey"),
-databaseURL: localStorage.getItem("dbUrl"),
-projectId: localStorage.getItem("projectId")
+apiKey: localStorage.getItem("AIzaSyCAoMB2gvsQe1Oq6LGluR2IfjjszyOPWi8"),
+databaseURL: localStorage.getItem("https://rajrachitkey-default-rtdb.firebaseio.com"),
+projectId: localStorage.getItem("rajrachitkey")
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-/* Generate HWID */
-let hwid =
-localStorage.getItem("hwid");
-
-if(!hwid){
-hwid =
-Math.random().toString(36).substring(2,10)
-+ "-"
-+ Date.now();
-
-localStorage.setItem("hwid",hwid);
+function generateHWID(){
+return "HWID-" +
+Math.random().toString(36).substring(2,8) +
+Date.now().toString().substring(6);
 }
 
-document.getElementById("hwid")
-.innerText = hwid;
+let hwid = localStorage.getItem("hwid");
 
-/* Login */
+if(!hwid){
+hwid = generateHWID();
+localStorage.setItem("hwid", hwid);
+}
+
+document.getElementById("hwid").innerText = hwid;
+
 window.login = async function(){
 
 let key =
 document.getElementById("key").value.trim();
 
-if(!key){
+if(key==""){
 document.getElementById("status")
-.innerText = "Enter Key First";
+.innerText="Enter Key First";
 return;
 }
 
 document.getElementById("status")
-.innerText = "Checking...";
+.innerText="Checking...";
 
 let snap =
 await get(ref(db,"licenses/"+key));
 
 if(!snap.exists()){
 document.getElementById("status")
-.innerText = "Invalid Key";
+.innerText="Invalid Key";
 return;
 }
 
 let data = snap.val();
 
-/* Ban Check */
 if(data.status=="banned"){
-
 document.getElementById("status")
-.innerText = "Key Banned";
+.innerText="Key Banned";
 
 setTimeout(()=>{
 window.location.href="action://close";
@@ -287,19 +432,17 @@ window.location.href="action://close";
 return;
 }
 
-/* Save Device */
 let deviceId =
-"device_" + Date.now();
+"device_"+Date.now();
 
 await set(
 ref(db,"licenses/"+key+"/devices/"+deviceId),
 {
-hwid: hwid
+hwid:hwid
 });
 
 document.getElementById("status")
-.innerText = "Login Success";
-
+.innerText="Login Success";
 };
 
 </script>
