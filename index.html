@@ -188,7 +188,7 @@ const db = getDatabase(app);
 
 /* Generate HWID */
 function generateHWID(){
-return "HWID-" +
+return "" +
 Math.random().toString(36).substring(2,8) +
 Date.now().toString().substring(5);
 }
