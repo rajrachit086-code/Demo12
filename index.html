@@ -13,7 +13,6 @@ padding:0;
 box-sizing:border-box;
 font-family:system-ui;
 }
-
 body{
 height:100vh;
 display:flex;
@@ -21,7 +20,6 @@ justify-content:center;
 align-items:center;
 background:#000;
 }
-
 .popup{
 width:340px;
 background:#111;
@@ -29,29 +27,22 @@ border-radius:24px;
 overflow:hidden;
 box-shadow:0 0 25px rgba(0,136,255,.25);
 }
-
 .banner{
 height:170px;
 background:url('https://raw.githubusercontent.com/rajrachit086-code/Web/refs/heads/main/20260531_155902.jpg') center/cover;
 position:relative;
 }
-
 .banner::after{
 content:"";
 position:absolute;
 inset:0;
-background:linear-gradient(
-transparent,
-rgba(18,18,25,.96)
-);
+background:linear-gradient(transparent,rgba(18,18,25,.96));
 }
-
 .content{
 padding:20px;
 color:white;
 text-align:center;
 }
-
 .logo{
 width:72px;
 height:72px;
@@ -64,21 +55,17 @@ font-size:34px;
 margin:-55px auto 15px;
 position:relative;
 z-index:2;
-box-shadow:0 0 15px rgba(0,136,255,.45);
 }
-
 .title{
 font-size:24px;
 font-weight:800;
 margin-bottom:5px;
 }
-
 .subtitle{
 font-size:13px;
 color:#aaa;
 margin-bottom:18px;
 }
-
 .input{
 width:100%;
 height:52px;
@@ -91,7 +78,6 @@ color:white;
 outline:none;
 margin-bottom:15px;
 }
-
 .hwidBox{
 background:#111821;
 padding:14px;
@@ -102,7 +88,6 @@ color:#aaa;
 margin-bottom:18px;
 text-align:left;
 }
-
 .btn{
 width:100%;
 height:50px;
@@ -113,9 +98,7 @@ font-weight:700;
 cursor:pointer;
 background:#0088ff;
 color:white;
-box-shadow:0 0 15px rgba(0,136,255,.45);
 }
-
 .status{
 margin-top:15px;
 font-size:14px;
@@ -126,37 +109,29 @@ font-weight:600;
 <body>
 
 <div class="popup">
-
 <div class="banner"></div>
 
 <div class="content">
 
 <div class="logo">🔐</div>
 
-<div class="title">
-Secure Login
-</div>
+<div class="title">Secure Login</div>
 
 <div class="subtitle">
 Enter your access key to continue
 </div>
 
-<input id="key"
-class="input"
-placeholder="Enter Access Key">
+<input id="key" class="input" placeholder="Enter Access Key">
 
 <div class="hwidBox">
-HWID:
-<span id="hwid"></span>
+HWID: <span id="hwid"></span>
 </div>
 
-<button class="btn"
-onclick="login()">
+<button class="btn" onclick="login()">
 Authenticate
 </button>
 
-<div class="status"
-id="status">
+<div class="status" id="status">
 Waiting...
 </div>
 
@@ -185,14 +160,11 @@ projectId: "rajrachitkey"
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-/* Generate HWID */
 function generateHWID(){
-return 
-Math.random().toString(36).substring(2,8) +
+return Math.random().toString(36).substring(2,8) +
 Date.now().toString().substring(5);
 }
 
-/* Load or Create HWID */
 let hwid = localStorage.getItem("hwid");
 
 if(!hwid){
@@ -202,7 +174,6 @@ localStorage.setItem("hwid", hwid);
 
 document.getElementById("hwid").innerText = hwid;
 
-/* Login Function */
 window.login = async function(){
 
 let key = document.getElementById("key").value.trim();
@@ -214,30 +185,7 @@ return;
 
 document.getElementById("status").innerText="Checking...";
 
-/* OFFLINE MODE */
-if(!navigator.onLine){
-
-let savedKey = localStorage.getItem("savedKey");
-let savedHWID = localStorage.getItem("savedHWID");
-
-if(savedKey===key && savedHWID===hwid){
-
-document.getElementById("status").innerText="Offline Login Success";
-
-setTimeout(()=>{
-if(window.Android){
-Android.close();
-}
-},1000);
-
-}else{
-document.getElementById("status").innerText="No Internet / Invalid Offline Key";
-}
-
-return;
-}
-
-/* ONLINE MODE */
+/* ONLINE CHECK FIRST */
 try{
 
 let snap = await get(ref(db,"licenses/"+key));
@@ -249,8 +197,11 @@ return;
 
 let data = snap.val();
 
-/* Ban Check */
+/* BAN CHECK */
 if(data.status==="banned"){
+
+localStorage.removeItem("savedKey");
+localStorage.removeItem("savedHWID");
 
 document.getElementById("status").innerText="Key Banned";
 
@@ -273,12 +224,6 @@ hwid:hwid
 }
 );
 
-/* Save Main HWID */
-await set(
-ref(db,"licenses/"+key+"/hwid"),
-hwid
-);
-
 /* Save Offline */
 localStorage.setItem("savedKey", key);
 localStorage.setItem("savedHWID", hwid);
@@ -293,7 +238,23 @@ Android.close();
 
 }catch(e){
 
-document.getElementById("status").innerText="Connection Error";
+/* OFFLINE MODE */
+let savedKey = localStorage.getItem("savedKey");
+let savedHWID = localStorage.getItem("savedHWID");
+
+if(savedKey===key && savedHWID===hwid){
+
+document.getElementById("status").innerText="Offline Login Success";
+
+setTimeout(()=>{
+if(window.Android){
+Android.close();
+}
+},1000);
+
+}else{
+document.getElementById("status").innerText="No Internet / Invalid Key";
+}
 
 }
 
@@ -302,4 +263,4 @@ document.getElementById("status").innerText="Connection Error";
 </script>
 
 </body>
-  </html>
+</html>
